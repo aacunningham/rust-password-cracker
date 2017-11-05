@@ -1,0 +1,6 @@
+[package]
+name = "passcode_cracker"
+version = "0.1.0"
+authors = ["Aaron Cunningham <aa.cunningham@outlook.com>"]
+
+[dependencies]
