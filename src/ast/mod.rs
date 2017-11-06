@@ -3,6 +3,7 @@ pub mod variable;
 pub mod operator;
 pub mod expression;
 
+use self::evaluable::Value;
 use self::variable::Variable;
 use self::expression::{Expression, BinaryExpression};
 use self::operator::Operator;
@@ -17,6 +18,22 @@ pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static st
         match c {
             v @ 'a'...'d' => exp_vec.push(Box::new(Expression::Variable(Variable { name: v }))),
             '*' => op_vec.push(Operator::Binary(Multiply)),
+            v @ '0'...'9' => {
+                let number: i8 = match v {
+                    '0' => 0,
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    _ => 0,
+                };
+                exp_vec.push(Box::new(Expression::Value(Value::Numerical(number))));
+            },
             o @ '*'...'>' => {
                 let op = match o {
                     '*' => Operator::Binary(Multiply),

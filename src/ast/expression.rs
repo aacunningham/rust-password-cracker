@@ -6,6 +6,7 @@ use ast::variable::Variable;
 pub enum Expression {
     BinaryExp(BinaryExpression),
     Variable(Variable),
+    Value(Value),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -18,8 +19,9 @@ pub struct BinaryExpression {
 impl Evaluable for Expression {
     fn evaluate(&self, arr: &[i8]) -> Result<Value, &'static str> {
         match self {
-            &Expression::Variable(ref var) => Ok(var.evaluate(&arr)?),
-            &Expression::BinaryExp(ref bin_exp) => Ok(bin_exp.evaluate(&arr)?),
+            &Expression::Variable(ref var) => var.evaluate(&arr),
+            &Expression::BinaryExp(ref bin_exp) => bin_exp.evaluate(&arr),
+            &Expression::Value(ref val) => val.evaluate(&arr),
         }
     }
 }
@@ -53,6 +55,19 @@ impl Evaluable for BinaryExpression {
         } else {
             Err("Something went wrong...")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_evaluation() {
+        let t = Expression::BinaryExp(BinaryExpression {l_value: Box::new(Expression::Variable(Variable {name: 'a'})), operator: Operator::Boolean(BooleanOperator::Equal), r_value: Box::new(Expression::Value(Value::Numerical(3)))});
+
+        assert!(t.evaluate(&[1,2,3,4]) == Ok(Value::Boolean(false)));
+        assert!(t.evaluate(&[3,2,3,4]) == Ok(Value::Boolean(true)));
     }
 }
 
