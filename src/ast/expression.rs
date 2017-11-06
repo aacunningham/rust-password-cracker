@@ -2,11 +2,13 @@ use ast::operator::{Operator, BinaryOperator, BooleanOperator};
 use ast::evaluable::{Value, Evaluable};
 use ast::variable::Variable;
 
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     BinaryExp(BinaryExpression),
     Variable(Variable),
 }
 
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct BinaryExpression {
     pub l_value: Box<Expression>,
     pub operator: Operator,

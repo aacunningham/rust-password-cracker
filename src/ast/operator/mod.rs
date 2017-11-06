@@ -4,7 +4,7 @@ mod boolean_operator;
 pub use self::binary_operator::BinaryOperator;
 pub use self::boolean_operator::BooleanOperator;
 
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Clone)]
 pub enum Operator {
     Boolean(BooleanOperator),
     Binary(BinaryOperator),

@@ -1,5 +1,6 @@
 use ast::evaluable::{Value, Evaluable};
 
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Variable {
     pub name: char,
 }
