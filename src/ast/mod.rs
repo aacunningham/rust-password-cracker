@@ -40,27 +40,22 @@ pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static st
 }
 
 fn handle_low_priority_op(exp_vec: &mut Vec<Box<Expression>>, op_vec: &mut Vec<Operator>, new_op: Operator) -> bool {
-    loop {
-
-        if let Some(x) = op_vec.pop() {
-            match x {
-                Operator::Binary(operator) => {
-                    let r_value = exp_vec.pop();
-                    let l_value = exp_vec.pop();
-                    match (l_value, r_value) {
-                        (Some(l), Some(r)) => {
-                            exp_vec.push(Box::new(Expression::BinaryExp(BinaryExpression { l_value: l, operator: Operator::Binary(operator), r_value: r })));
-                        },
-                        _ => return false,
-                    }
-                },
-                Operator::Boolean(operator) => {
-                    op_vec.push(Operator::Boolean(operator));
-                },
-            }
-        } else {
-            break;
-        };
+    while let Some(x) = op_vec.pop() {
+        match x {
+            Operator::Binary(operator) => {
+                let r_value = exp_vec.pop();
+                let l_value = exp_vec.pop();
+                match (l_value, r_value) {
+                    (Some(l), Some(r)) => {
+                        exp_vec.push(Box::new(Expression::BinaryExp(BinaryExpression { l_value: l, operator: Operator::Binary(operator), r_value: r })));
+                    },
+                    _ => return false,
+                }
+            },
+            Operator::Boolean(operator) => {
+                op_vec.push(Operator::Boolean(operator));
+            },
+        }
     }
     op_vec.push(new_op);
     true
