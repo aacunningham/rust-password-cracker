@@ -11,7 +11,7 @@ pub struct RuleList {
 }
 
 pub struct Passcode {
-    possible_values: Vec<[i8; 4]>,
+    possible_values: Vec<Vec<i8>>,
     rule_list: RuleList,
 }
 
@@ -22,7 +22,7 @@ impl RuleList {
         }
     }
 
-    fn run_rules(&self, combination: &[i8; 4]) -> bool {
+    fn run_rules(&self, combination: &Vec<i8>) -> bool {
         for rule in self.rules.iter() {
             if let Ok(Value::Boolean(res)) = rule.evaluate(combination) {
                 if !res {
@@ -45,17 +45,22 @@ impl RuleList {
 }
 
 impl Passcode {
-    pub fn new() -> Passcode {
-        let mut combinations: Vec<[i8; 4]> = Vec::new();
-        for a in 0..10 {
-            for b in 0..10 {
-                for c in 0..10 {
-                    for d in 0..10 {
-                        combinations.push([a, b, c, d]);
-                    }
+    pub fn new(length: u32) -> Passcode {
+        let total_combinations: usize = 10usize.pow(length);
+        let mut combinations: Vec<Vec<i8>> = vec![Vec::with_capacity(length as usize); total_combinations];
+        let mut chunksize = 1;
+        while chunksize < total_combinations {
+            let mut current_val = 0;
+            for combination_chunk in combinations.chunks_mut(chunksize) {
+                for combination in combination_chunk.iter_mut() {
+                    combination.push(current_val);
                 }
+                current_val += 1;
+                current_val = current_val % 10;
             }
+            chunksize = chunksize * 10;
         }
+
         Passcode {
             possible_values: combinations,
             rule_list: RuleList::new(),
@@ -87,8 +92,20 @@ impl Passcode {
         }
     }
 
-    pub fn solution_exists() -> bool {
-        true
+    pub fn solutions_left(&self) -> usize {
+        self.possible_values.len()
+    }
+
+    pub fn solution_exists(&self) -> bool {
+        self.possible_values.len() > 0
+    }
+
+    pub fn solution(&self) -> Result<&Vec<i8>, &'static str> {
+        if self.solutions_left() == 1 {
+            Ok(&self.possible_values[0])
+        } else {
+            Err("Nope")
+        }
     }
 }
 

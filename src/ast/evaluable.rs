@@ -5,11 +5,11 @@ pub enum Value {
 }
 
 pub trait Evaluable {
-    fn evaluate(&self, arr: &[i8]) -> Result<Value, &'static str>;
+    fn evaluate(&self, arr: &Vec<i8>) -> Result<Value, &'static str>;
 }
 
 impl Evaluable for Value {
-    fn evaluate(&self, _arr: &[i8]) -> Result<Value, &'static str> {
+    fn evaluate(&self, _arr: &Vec<i8>) -> Result<Value, &'static str> {
         Ok(self.clone())
     }
 }

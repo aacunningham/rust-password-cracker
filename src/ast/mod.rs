@@ -16,7 +16,7 @@ pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static st
     let mut has_failed = false;
     for c in input.chars() {
         match c {
-            v @ 'a'...'d' => exp_vec.push(Box::new(Expression::Variable(Variable { name: v }))),
+            v @ 'a'...'z' => exp_vec.push(Box::new(Expression::Variable(Variable { name: v }))),
             '*' => op_vec.push(Operator::Binary(Multiply)),
             v @ '0'...'9' => {
                 let number: i8 = match v {

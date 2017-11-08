@@ -17,7 +17,7 @@ pub struct BinaryExpression {
 }
 
 impl Evaluable for Expression {
-    fn evaluate(&self, arr: &[i8]) -> Result<Value, &'static str> {
+    fn evaluate(&self, arr: &Vec<i8>) -> Result<Value, &'static str> {
         match self {
             &Expression::Variable(ref var) => var.evaluate(&arr),
             &Expression::BinaryExp(ref bin_exp) => bin_exp.evaluate(&arr),
@@ -27,7 +27,7 @@ impl Evaluable for Expression {
 }
 
 impl Evaluable for BinaryExpression {
-    fn evaluate(&self, arr: &[i8]) -> Result<Value, &'static str> {
+    fn evaluate(&self, arr: &Vec<i8>) -> Result<Value, &'static str> {
         if let Operator::Binary(ref op) = self.operator {
             let (l, r) = match (self.l_value.evaluate(&arr)?, self.r_value.evaluate(&arr)?) {
                 (Value::Numerical(l_val), Value::Numerical(r_val)) => (Ok(l_val), Ok(r_val)),
@@ -66,8 +66,8 @@ mod tests {
     fn test_evaluation() {
         let t = Expression::BinaryExp(BinaryExpression {l_value: Box::new(Expression::Variable(Variable {name: 'a'})), operator: Operator::Boolean(BooleanOperator::Equal), r_value: Box::new(Expression::Value(Value::Numerical(3)))});
 
-        assert!(t.evaluate(&[1,2,3,4]) == Ok(Value::Boolean(false)));
-        assert!(t.evaluate(&[3,2,3,4]) == Ok(Value::Boolean(true)));
+        assert!(t.evaluate(&vec![1,2,3,4]) == Ok(Value::Boolean(false)));
+        assert!(t.evaluate(&vec![3,2,3,4]) == Ok(Value::Boolean(true)));
     }
 }
 
