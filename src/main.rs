@@ -5,26 +5,46 @@ use std::io::Write;
 use passcode_cracker::{Passcode};
 
 fn main() {
-    'hi: loop {
-        println!("Number of digits: ");
+    'main: loop {
+        let num_of_digits;
         let mut input = String::new();
-        io::stdin().read_line(&mut input);
-        if input == "q" {
-            break;
+        'digit: loop {
+            println!("Number of digits: ");
+            io::stdin().read_line(&mut input).ok();
+            input = input.trim().to_owned();
+            if input == "q" {
+                break 'main;
+            }
+            match input.parse::<u32>() {
+                Ok(value) => {
+                    num_of_digits = value;
+                    break 'digit;
+                },
+                Err(_) => {
+                    println!("Invalid digit, try again.");
+                    input.clear();
+                },
+            };
         }
-        let num_of_digits = input.trim().parse::<u32>().unwrap();
         let mut passcode_attempt = Passcode::new(num_of_digits);
         while passcode_attempt.solutions_left() > 1 {
+            println!("Solutions left: {}", passcode_attempt.solutions_left());
             println!("Hint: ");
             input.clear();
-            io::stdin().read_line(&mut input);
+            io::stdin().read_line(&mut input).ok();
+            input = input.trim().to_owned();
             if input == "q" {
-                break 'hi;
+                break 'main;
             }
-            println!("{:?}", input);
-            passcode_attempt.add_rule(&input);
-            passcode_attempt.eliminate_combinations();
-            println!("Solutions left: {}", passcode_attempt.solutions_left());
+            match passcode_attempt.add_rule(&input) {
+                Ok(_) => {
+                    passcode_attempt.eliminate_combinations();
+                },
+                Err(message) => {
+                    io::stdout().write(message.as_bytes()).ok();
+                    io::stdout().write(b"\n").ok();
+                },
+            };
         }
 
         println!("Solution: {:?}", passcode_attempt.solution().unwrap());

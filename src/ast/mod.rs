@@ -10,13 +10,19 @@ use self::operator::Operator;
 use self::operator::BinaryOperator::{Add, Subtract, Multiply};
 use self::operator::BooleanOperator::{Equal, GreaterThan, LessThan};
 
-pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static str> {
+pub fn convert_string_to_ast(input: &str, total_vars: u8) -> Result<Box<Expression>, String> {
     let mut exp_vec: Vec<Box<Expression>> = Vec::new();
     let mut op_vec: Vec<Operator> = Vec::new();
-    let mut has_failed = false;
-    for c in input.chars() {
+    let last_char = (total_vars + 96u8) as char;
+    for c in input.to_lowercase().chars() {
         match c {
-            v @ 'a'...'z' => exp_vec.push(Box::new(Expression::Variable(Variable { name: v }))),
+            v @ 'a'...'z' => {
+                if v > last_char {
+                    return Err(format!("Invalid variable added. You may only use 'a' through '{}'. You used: '{}'", last_char, v));
+                }
+                exp_vec.push(Box::new(Expression::Variable(Variable { name: v })));
+                continue;
+            },
             '*' => op_vec.push(Operator::Binary(Multiply)),
             v @ '0'...'9' => {
                 let number: i8 = match v {
@@ -33,6 +39,7 @@ pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static st
                     _ => 0,
                 };
                 exp_vec.push(Box::new(Expression::Value(Value::Numerical(number))));
+                continue;
             },
             o @ '*'...'>' => {
                 let op = match o {
@@ -44,13 +51,11 @@ pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static st
                     '>' => Operator::Boolean(GreaterThan),
                     _ => continue,
                 };
-                has_failed = !handle_ops(&mut exp_vec, &mut op_vec, op);
+                if !handle_ops(&mut exp_vec, &mut op_vec, op) {
+                    return Err(format!("Malformed input string"));
+                }
             },
-            _ => { continue; },
-        }
-
-        if has_failed {
-            return Err("Malformed input string");
+            _ => continue,
         }
     }
 
@@ -61,14 +66,14 @@ pub fn convert_string_to_ast(input: &str) -> Result<Box<Expression>, &'static st
             (Some(l), Some(r)) => {
                 exp_vec.push(Box::new(Expression::BinaryExp(BinaryExpression { l_value: l, operator: op, r_value: r })));
             },
-            _ => return Err("Malformed input string"),
+            _ => return Err(format!("Malformed input string")),
         }
     }
 
     if let Some(final_exp) = exp_vec.pop() {
-        Ok(final_exp)
+        validate_ast(final_exp)
     } else {
-        Err("Something went wrong I guess")
+        Err(format!("Something went wrong I guess"))
     }
 }
 
@@ -90,6 +95,13 @@ fn handle_ops(exp_vec: &mut Vec<Box<Expression>>, op_vec: &mut Vec<Operator>, ne
     }
     op_vec.push(new_op);
     true
+}
+
+fn validate_ast(ast: Box<Expression>) -> Result<Box<Expression>, String> {
+    match *ast {
+        Expression::BinaryExp(BinaryExpression {l_value: _, operator: Operator::Boolean(_), r_value: _}) => Ok(ast),
+        _ => Err(format!("Malformed AST, a boolean operator ('=', '<', '>') is required")),
+    }
 }
 
 #[cfg(test)]

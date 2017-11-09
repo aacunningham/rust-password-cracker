@@ -1,9 +1,7 @@
 mod ast;
 
-use ast::operator::{Operator, BinaryOperator, BooleanOperator};
-use ast::expression::{Expression, BinaryExpression};
+use ast::expression::Expression;
 use ast::evaluable::{Value, Evaluable};
-use ast::variable::Variable;
 
 
 pub struct RuleList {
@@ -11,6 +9,7 @@ pub struct RuleList {
 }
 
 pub struct Passcode {
+    length: u32,
     possible_values: Vec<Vec<i8>>,
     rule_list: RuleList,
 }
@@ -34,13 +33,10 @@ impl RuleList {
         true
     }
 
-    fn add_rule(&mut self, rule: &str) -> bool {
-        if let Ok(ast) = ast::convert_string_to_ast(rule) {
-            self.rules.push(ast);
-            return true;
-        }
-
-        false
+    fn add_rule(&mut self, rule: &str, length: u8) -> Result<(), String> {
+        let ast = ast::convert_string_to_ast(rule, length)?;
+        self.rules.push(ast);
+        Ok(())
     }
 }
 
@@ -62,6 +58,7 @@ impl Passcode {
         }
 
         Passcode {
+            length: length,
             possible_values: combinations,
             rule_list: RuleList::new(),
         }
@@ -82,8 +79,8 @@ impl Passcode {
         bad_combinations.len()
     }
 
-    pub fn add_rule(&mut self, rule: &str) -> bool {
-        self.rule_list.add_rule(rule)
+    pub fn add_rule(&mut self, rule: &str) -> Result<(), String> {
+        self.rule_list.add_rule(rule, self.length as u8)
     }
 
     pub fn print_solutions(&self) {
