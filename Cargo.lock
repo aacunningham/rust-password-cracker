@@ -1,4 +1,4 @@
-[root]
+[[package]]
 name = "passcode_cracker"
 version = "0.1.0"
 

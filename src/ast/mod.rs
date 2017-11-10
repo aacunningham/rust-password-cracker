@@ -25,7 +25,7 @@ pub fn convert_string_to_ast(input: &str, total_vars: u8) -> Result<Box<Expressi
             },
             '*' => op_vec.push(Operator::Binary(Multiply)),
             v @ '0'...'9' => {
-                let number: i8 = match v {
+                let number: u8 = match v {
                     '0' => 0,
                     '1' => 1,
                     '2' => 2,
@@ -191,7 +191,7 @@ mod tests {
         let var1 = Expression::Variable(Variable {name: 'a'});
         let var2 = Expression::Variable(Variable {name: 'b'});
         let expected_result = Ok(Box::new(Expression::BinaryExp(BinaryExpression {l_value: Box::new(var1), operator: Operator::Boolean(Equal), r_value: Box::new(var2)})));
-        assert_eq!(convert_string_to_ast(input), expected_result);
+        assert_eq!(convert_string_to_ast(input, 4), expected_result);
     }
 
     #[test]
@@ -201,7 +201,7 @@ mod tests {
         let var1 = Expression::Variable(Variable {name: 'a'});
         let var2 = Expression::Variable(Variable {name: 'b'});
         let expected_result = Ok(Box::new(Expression::BinaryExp(BinaryExpression {l_value: Box::new(var1), operator: Operator::Binary(Add), r_value: Box::new(var2)})));
-        assert_eq!(convert_string_to_ast(input), expected_result);
+        assert_eq!(convert_string_to_ast(input, 4), expected_result);
     }
 
     #[test]
@@ -212,7 +212,7 @@ mod tests {
         let var2 = Expression::Variable(Variable {name: 'b'});
         let var3 = Expression::Variable(Variable {name: 'c'});
         let expected_result = Ok(Box::new(Expression::BinaryExp(BinaryExpression {l_value: Box::new(Expression::BinaryExp(BinaryExpression {l_value: Box::new(var1), operator: Operator::Binary(Multiply), r_value: Box::new(var2)})), operator: Operator::Boolean(Equal), r_value: Box::new(var3)})));
-        assert_eq!(convert_string_to_ast(input), expected_result);
+        assert_eq!(convert_string_to_ast(input, 4), expected_result);
     }
 }
 

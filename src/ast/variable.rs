@@ -6,7 +6,7 @@ pub struct Variable {
 }
 
 impl Evaluable for Variable {
-    fn evaluate(&self, arr: &Vec<i8>) -> Result<Value, &'static str> {
+    fn evaluate(&self, arr: &Vec<u8>) -> Result<Value, &'static str> {
         match self.name {
             c @ 'a'...'z' => Ok(Value::Numerical(arr[(c as usize) - 97])),
             _ => Err("Incorrect variable name"),

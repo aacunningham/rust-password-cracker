@@ -2,7 +2,7 @@ extern crate passcode_cracker;
 
 use std::io;
 use std::io::Write;
-use passcode_cracker::{Passcode};
+use passcode_cracker::Passcode;
 
 fn main() {
     'main: loop {
@@ -15,7 +15,7 @@ fn main() {
             if input == "q" {
                 break 'main;
             }
-            match input.parse::<u32>() {
+            match input.parse::<usize>() {
                 Ok(value) => {
                     num_of_digits = value;
                     break 'digit;

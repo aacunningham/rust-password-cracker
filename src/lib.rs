@@ -1,4 +1,10 @@
+#![feature(test)]
+
+extern crate test;
+
 mod ast;
+
+use test::Bencher;
 
 use ast::expression::Expression;
 use ast::evaluable::{Value, Evaluable};
@@ -9,8 +15,8 @@ pub struct RuleList {
 }
 
 pub struct Passcode {
-    length: u32,
-    possible_values: Vec<Vec<i8>>,
+    length: usize,
+    possible_values: Vec<Vec<u8>>,
     rule_list: RuleList,
 }
 
@@ -21,7 +27,7 @@ impl RuleList {
         }
     }
 
-    fn run_rules(&self, combination: &Vec<i8>) -> bool {
+    fn run_rules(&self, combination: &Vec<u8>) -> bool {
         for rule in self.rules.iter() {
             if let Ok(Value::Boolean(res)) = rule.evaluate(combination) {
                 if !res {
@@ -41,21 +47,9 @@ impl RuleList {
 }
 
 impl Passcode {
-    pub fn new(length: u32) -> Passcode {
-        let total_combinations: usize = 10usize.pow(length);
-        let mut combinations: Vec<Vec<i8>> = vec![Vec::with_capacity(length as usize); total_combinations];
-        let mut chunksize = 1;
-        while chunksize < total_combinations {
-            let mut current_val = 0;
-            for combination_chunk in combinations.chunks_mut(chunksize) {
-                for combination in combination_chunk.iter_mut() {
-                    combination.push(current_val);
-                }
-                current_val += 1;
-                current_val = current_val % 10;
-            }
-            chunksize = chunksize * 10;
-        }
+    pub fn new(length: usize) -> Passcode {
+        let total_combinations: usize = 10usize.pow(length as u32);
+        let mut combinations: Vec<Vec<u8>> = CombinationGenerator::new(length).collect();
 
         Passcode {
             length: length,
@@ -97,12 +91,70 @@ impl Passcode {
         self.possible_values.len() > 0
     }
 
-    pub fn solution(&self) -> Result<&Vec<i8>, &'static str> {
+    pub fn solution(&self) -> Result<&Vec<u8>, &'static str> {
         if self.solutions_left() == 1 {
             Ok(&self.possible_values[0])
         } else {
             Err("Nope")
         }
     }
+}
+
+pub struct CombinationGenerator {
+    length: usize,
+    count: usize,
+}
+
+impl CombinationGenerator {
+    pub fn new(length: usize) -> CombinationGenerator {
+        CombinationGenerator { length: length, count: 0 }
+    }
+}
+
+impl Iterator for CombinationGenerator {
+    type Item = Vec<u8>;
+    fn next(&mut self) -> Option<Vec<u8>> {
+        if self.count >= 10usize.pow(self.length as u32) {
+            return None;
+        }
+        let mut ret_vec: Vec<u8> = vec![0; self.length];
+        let mut count_copy = self.count;
+        for i in (0..self.length).rev() {
+            ret_vec[i] = (count_copy % 10) as u8;
+            count_copy /= 10;
+            if count_copy == 0 {
+                break;
+            }
+        }
+        self.count += 1;
+        Some(ret_vec)
+    }
+}
+
+#[bench]
+fn bench_first_for_loop(b: &mut Bencher) {
+    b.iter(|| {
+        let total_combinations: usize = 10000;
+        let mut combinations: Vec<Vec<u8>> = vec![Vec::with_capacity(4 as usize); total_combinations];
+        let mut chunksize = 1;
+        while chunksize < total_combinations {
+            let mut current_val = 0;
+            for combination_chunk in combinations.chunks_mut(chunksize) {
+                for combination in combination_chunk.iter_mut() {
+                    combination.push(current_val);
+                }
+                current_val += 1;
+                current_val = current_val % 10;
+            }
+            chunksize = chunksize * 10;
+        }
+    });
+}
+
+#[bench]
+fn bench_new_generator(b: &mut Bencher) {
+    b.iter(|| {
+        let mut combinations: Vec<Vec<u8>> = test::black_box(CombinationGenerator::new(4).collect());
+    });
 }
 

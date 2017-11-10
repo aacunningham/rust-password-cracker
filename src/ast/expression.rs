@@ -17,7 +17,7 @@ pub struct BinaryExpression {
 }
 
 impl Evaluable for Expression {
-    fn evaluate(&self, arr: &Vec<i8>) -> Result<Value, &'static str> {
+    fn evaluate(&self, arr: &Vec<u8>) -> Result<Value, &'static str> {
         match self {
             &Expression::Variable(ref var) => var.evaluate(&arr),
             &Expression::BinaryExp(ref bin_exp) => bin_exp.evaluate(&arr),
@@ -27,7 +27,7 @@ impl Evaluable for Expression {
 }
 
 impl Evaluable for BinaryExpression {
-    fn evaluate(&self, arr: &Vec<i8>) -> Result<Value, &'static str> {
+    fn evaluate(&self, arr: &Vec<u8>) -> Result<Value, &'static str> {
         if let Operator::Binary(ref op) = self.operator {
             let (l, r) = match (self.l_value.evaluate(&arr)?, self.r_value.evaluate(&arr)?) {
                 (Value::Numerical(l_val), Value::Numerical(r_val)) => (Ok(l_val), Ok(r_val)),
