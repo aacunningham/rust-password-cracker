@@ -22,20 +22,15 @@ pub struct Passcode {
 
 impl RuleList {
     fn new() -> RuleList {
-        RuleList {
-            rules: Vec::new(),
-        }
+        RuleList { rules: Vec::new() }
     }
 
     fn run_rules(&self, combination: &Vec<u8>) -> bool {
         for rule in self.rules.iter() {
             if let Ok(Value::Boolean(res)) = rule.evaluate(combination) {
-                if !res {
-                    return false;
-                }
+                if !res { return false; }
             }
         }
-
         true
     }
 
@@ -88,7 +83,7 @@ impl Passcode {
     }
 
     pub fn solution_exists(&self) -> bool {
-        self.possible_values.len() > 0
+        self.solutions_left() > 0
     }
 
     pub fn solution(&self) -> Result<&Vec<u8>, &'static str> {
