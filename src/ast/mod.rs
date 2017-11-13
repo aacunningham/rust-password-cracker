@@ -198,9 +198,7 @@ mod tests {
     fn convert_binary() {
         let input = "a + b";
 
-        let var1 = Expression::Variable(Variable {name: 'a'});
-        let var2 = Expression::Variable(Variable {name: 'b'});
-        let expected_result = Ok(Box::new(Expression::BinaryExp(BinaryExpression {l_value: Box::new(var1), operator: Operator::Binary(Add), r_value: Box::new(var2)})));
+        let expected_result = Err(format!("Malformed AST, a boolean operator ('=', '<', '>') is required"));
         assert_eq!(convert_string_to_ast(input, 4), expected_result);
     }
 
